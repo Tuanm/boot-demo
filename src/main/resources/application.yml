@@ -1,0 +1,53 @@
+server:
+  security:
+    authentication:
+      private:
+        header-key: Api-Key
+        secret-key: vmogroup
+      jwt:
+        validity-in-seconds: 3600
+        secret-key: vmodev
+
+api:
+  posts:
+    generator:
+      lorem-ipsum:
+        url: https://jaspervdj.be/lorem-markdownum/markdown.txt
+
+logging:
+  file: logs/demo.log
+  level:
+    root: INFO
+    dev.tuanm.demo: DEBUG
+
+spring:
+  # main:
+  #   allow-bean-definition-overriding: true
+  cache:
+    type: redis
+  redis:
+    host: localhost
+    port: 6379
+    password:
+    ttl:
+      default-in-seconds: 3600
+      posts-view: 7200
+      posts-search: 300
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+       dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/demo?useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: 123@
+  liquibase:
+    change-log: classpath:db/db.changelog-master.xml
+  # batch:
+  #   job:
+  #     enabled: false # stop running job at startup
+  #   initialize-schema: always
