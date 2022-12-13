@@ -31,6 +31,6 @@ public class LoremIpsumContentGeneratingService implements ContentGeneratingServ
 
     @Override
     public String generate() {
-        return restTemplate.getForObject(properties.getUrl(), String.class);
+        return this.restTemplate.getForObject(properties.getUrl(), String.class);
     }
 }

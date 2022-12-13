@@ -43,6 +43,7 @@ public class PostWriteRepository extends AbstractWriteRepository<Post> {
                             ps.setString(pos++, post.getAuthor().getUsername());
                         }
                     });
+                    // TODO: insert into database using batch (ref: https://www.baeldung.com/jpa-hibernate-batch-insert-update).
                 });
     }
 }

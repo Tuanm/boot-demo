@@ -70,7 +70,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            configureWithFilter(http, new JwtFilter(jwtUtils, userService));
+            this.configureWithFilter(http, new JwtFilter(jwtUtils, userService));
         }
     }
 
@@ -90,7 +90,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            configureWithFilter(http, new PrivateResourceFilter(privateResourceUtils));
+            this.configureWithFilter(http, new PrivateResourceFilter(privateResourceUtils));
         }
     }
 }

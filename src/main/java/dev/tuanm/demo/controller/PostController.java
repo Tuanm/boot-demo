@@ -38,7 +38,7 @@ public class PostController {
     @Cacheable(key = "#postId", unless = "#result == null", cacheNames = CachingConstants.POST_VIEW_CACHE_NAME)
     @GetMapping(PathConstants.API_POSTS_VIEW_URL)
     public PostInfoResponse view(@PathVariable @NotNull Long postId) {
-        return postService.view(postId);
+        return this.postService.view(postId);
     }
 
     @Cacheable(key = "{ #title, #author, #page, #pageSize }", cacheNames = CachingConstants.POST_SEARCH_CACHE_NAME)
@@ -49,7 +49,7 @@ public class PostController {
             @RequestParam(required = false) String author,
             @RequestParam(required = false) Integer page,
             @RequestParam(name = "page_size", required = false) Integer pageSize) {
-        return postService.search(PostPaginationRequest.builder()
+        return this.postService.search(PostPaginationRequest.builder()
                 .postId(postId)
                 .title(title)
                 .author(author)
@@ -60,13 +60,13 @@ public class PostController {
     @CachePut(key = "#result.id", cacheNames = CachingConstants.POST_VIEW_CACHE_NAME)
     @PostMapping(PathConstants.API_POSTS_CREATION_URL)
     public PostInfoResponse create(@RequestBody @NotNull PostCreationRequest request) {
-        return postService.create(request);
+        return this.postService.create(request);
     }
 
     @CacheEvict(key = "#postId", cacheNames = CachingConstants.POST_VIEW_CACHE_NAME)
     @DeleteMapping(PathConstants.API_POSTS_DELETION_URL)
     public void remove(@PathVariable @NotNull Long postId) {
-        postService.remove(postId);
+        this.postService.remove(postId);
     }
 
     @PostMapping(PathConstants.API_POSTS_UPLOAD_URL)
@@ -83,7 +83,7 @@ public class PostController {
                 post.setContent(value);
             }
         };
-        postService.create(csv.as(PostCreationRequest::new, mapper));
+        this.postService.create(csv.as(PostCreationRequest::new, mapper));
     }
 
     @GetMapping(PathConstants.API_POSTS_GENERATE_URL)
@@ -92,6 +92,6 @@ public class PostController {
         @RequestParam(required = false) String generator,
         @RequestParam(required = false, defaultValue = "1") Integer total
     ) {
-        return postService.generate(async, total.intValue(), generator);
+        return this.postService.generate(async, total.intValue(), generator);
     }
 }

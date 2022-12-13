@@ -3,10 +3,10 @@ server:
     authentication:
       private:
         header-key: Api-Key
-        secret-key: vmogroup
+        secret-key: tuanm-auth-secret
       jwt:
         validity-in-seconds: 3600
-        secret-key: vmodev
+        secret-key: tuanm-token-secret
 
 api:
   posts:
@@ -21,8 +21,6 @@ logging:
     dev.tuanm.demo: DEBUG
 
 spring:
-  # main:
-  #   allow-bean-definition-overriding: true
   cache:
     type: redis
   redis:
@@ -39,7 +37,10 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-       dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+        # order_inserts: true
+        jpa:
+          batch_size: 10
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/demo?useUnicode=true&characterEncoding=UTF-8
@@ -47,7 +48,3 @@ spring:
     password: 123@
   liquibase:
     change-log: classpath:db/db.changelog-master.xml
-  # batch:
-  #   job:
-  #     enabled: false # stop running job at startup
-  #   initialize-schema: always

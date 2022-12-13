@@ -21,7 +21,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "roles", uniqueConstraints = {
-    @UniqueConstraint(columnNames = "name")
+        @UniqueConstraint(columnNames = "name")
 })
 public class Role extends BaseEntity implements GrantedAuthority {
     @EqualsAndHashCode.Include

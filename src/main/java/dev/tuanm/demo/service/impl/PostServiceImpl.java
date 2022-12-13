@@ -56,24 +56,24 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostInfoResponse create(PostCreationRequest request) {
         Optional<User> user = Optional.ofNullable(securityUtils.getLoggedUsername())
-                .flatMap(userRepository::findByUsername);
+                .flatMap(this.userRepository::findByUsername);
         if (user.isPresent()) {
-            Post saved = postRepository.save(Post.builder()
+            Post saved = this.postRepository.save(Post.builder()
                     .author(user.get())
                     .title(request.getTitle())
                     .content(request.getContent())
                     .build());
-            return toPostInfoResponse(saved);
+            return this.toPostInfoResponse(saved);
         }
         return null;
     }
 
     @Override
     public void create(Collection<PostCreationRequest> posts) {
-        Optional<User> user = Optional.ofNullable(securityUtils.getLoggedUsername())
-                .flatMap(userRepository::findByUsername);
+        Optional<User> user = Optional.ofNullable(this.securityUtils.getLoggedUsername())
+                .flatMap(this.userRepository::findByUsername);
         if (user.isPresent() && !posts.isEmpty()) {
-            postWriteRepository.saveAll(posts.stream()
+            this.postWriteRepository.saveAll(posts.stream()
                     .map(post -> Post.builder()
                             .author(user.get())
                             .title(post.getTitle())
@@ -85,14 +85,14 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostInfoResponse view(Long postId) {
-        return postRepository.findById(postId)
+        return this.postRepository.findById(postId)
                 .map(this::toPostInfoResponse)
                 .orElseThrow(NotFoundException::new);
     }
 
     @Override
     public Collection<PostInfoResponse> search(PostPaginationRequest request) {
-        return postRepository.search(
+        return this.postRepository.search(
                 PageRequest.of(request.getPage(), request.getPageSize()),
                 request.getPostId(),
                 request.getTitle(),
@@ -103,14 +103,14 @@ public class PostServiceImpl implements PostService {
     @Transactional
     @Override
     public void remove(Long postId) {
-        if (securityUtils.getLoggedAuthorities().contains(AuthorityConstants.ROLE_ADMIN)) {
-            postRepository.deleteById(postId);
+        if (this.securityUtils.getLoggedAuthorities().contains(AuthorityConstants.ROLE_ADMIN)) {
+            this.postRepository.deleteById(postId);
         } else {
-            if (Optional.ofNullable(securityUtils.getLoggedUsername())
-                    .map(username -> postRepository
+            if (Optional.ofNullable(this.securityUtils.getLoggedUsername())
+                    .map(username -> this.postRepository
                             .deleteByIdAndAuthor(postId, username) == DataResultConstants.MODIFIED_FAILED)
                     .orElse(true)) {
-                throw new UnauthorizedRequestException(null);
+                throw new UnauthorizedRequestException();
             }
         }
     }
@@ -118,11 +118,10 @@ public class PostServiceImpl implements PostService {
     @Override
     public Collection<String> generate(boolean async, int total, String generator) {
         return async
-                ? generateUsingCompletableFuture(total, generator)
-                : generateNormally(total, generator);
+                ? this.generateUsingCompletableFuture(total, generator)
+                : this.generateNormally(total, generator);
     }
 
-    // @SuppressWarnings("unused")
     private Collection<String> generateNormally(int total, String generator) {
         ContentGeneratingService contentGeneratingService = contentGeneratingServiceFactory.getService(generator);
         List<String> generatedContents = new ArrayList<>();

@@ -5,39 +5,15 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-<!--        <version>2.3.4.RELEASE</version>-->
         <version>2.2.6.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
-    <groupId>com.vmo.spring</groupId>
-    <artifactId>core</artifactId>
-    <version>${revision}${changelist}${sha1}</version>
-    <name>core-base</name>
-    <description>base</description>
+    <groupId>dev.tuanm</groupId>
+    <artifactId>demo</artifactId>
+    <version>1.0.0</version>
     <properties>
-        <java.version>1.8</java.version>
-
-        <revision>1.0.0</revision>
-        <changelist>-SNAPSHOT</changelist>
-        <sha1/>
-
-        <aws.version>1.12.196</aws.version>
-        <testSuite>**/FullTestSuite.class</testSuite>
-
-        <sonar.projectName>Core</sonar.projectName>
-        <sonar.qualitygate.wait>false</sonar.qualitygate.wait>
+        <java.version>11</java.version>
     </properties>
-
-    <distributionManagement>
-        <repository>
-            <id>gitlab-maven</id>
-            <url>https://git.vmo.dev/api/v4/projects/976/packages/maven</url>
-        </repository>
-        <snapshotRepository>
-            <id>gitlab-maven</id>
-            <url>https://git.vmo.dev/api/v4/projects/976/packages/maven</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <dependencies>
         <dependency>
@@ -135,16 +111,12 @@
             <version>4.5.2</version>
         </dependency>
 
-        <!--jdom-->
-        <!--real xml-->
         <dependency>
             <groupId>org.jdom</groupId>
             <artifactId>jdom2</artifactId>
             <version>2.0.6</version>
         </dependency>
-        <!--end-->
 
-        <!--xml parser-->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
@@ -155,24 +127,13 @@
             <artifactId>woodstox-core</artifactId>
             <version>5.1.0</version>
         </dependency>
-        <!--end-->
 
-        <!-- slack webhook for notification alert -->
-        <dependency>
-            <groupId>com.github.seratch</groupId>
-            <artifactId>jslack-api-client</artifactId>
-            <version>2.1.2</version>
-        </dependency>
-
-        <!--rxjava-->
         <dependency>
             <groupId>io.reactivex.rxjava2</groupId>
             <artifactId>rxjava</artifactId>
             <version>2.1.13</version>
         </dependency>
-        <!--end-->
 
-        <!--xml parser-->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
@@ -183,11 +144,9 @@
             <artifactId>woodstox-core</artifactId>
             <version>6.0.3</version>
         </dependency>
-        <!--end-->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
-            <!--<version>5.0.4.RELEASE</version>-->
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
@@ -198,13 +157,11 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <!--map object-->
         <dependency>
             <groupId>org.modelmapper</groupId>
             <artifactId>modelmapper</artifactId>
             <version>3.1.0</version>
         </dependency>
-        <!--end-->
 
         <dependency>
             <groupId>org.jadira.usertype</groupId>
@@ -212,7 +169,6 @@
             <version>7.0.0.CR1</version>
         </dependency>
 
-        <!--        xml bind-->
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
@@ -225,7 +181,6 @@
             <version>4.0.0</version>
         </dependency>
 
-        <!-- hibernate support for hikariCP -->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-hikaricp</artifactId>
@@ -237,7 +192,6 @@
             <version>2.0.2</version>
         </dependency>
 
-        <!-- jsonwebtoken support -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
@@ -260,11 +214,6 @@
                             </exclude>
                         </excludes>
                     </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.sonarsource.scanner.maven</groupId>
-                    <artifactId>sonar-maven-plugin</artifactId>
-                    <version>3.4.0.905</version>
                 </plugin>
             </plugins>
         </pluginManagement>

@@ -13,11 +13,11 @@ import dev.tuanm.demo.model.entity.Post;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-        @Query(value = " SELECT p.* FROM posts p "
+        @Query(nativeQuery = true, value = " SELECT p.* FROM posts p "
                         + " LEFT JOIN users u ON p.author = u.username "
                         + " WHERE (ISNULL(:postId) OR p.id = :postId) "
                         + " AND (ISNULL(:title) OR p.title LIKE %:title%) "
-                        + " AND (ISNULL(:author) OR p.author = :author) ", nativeQuery = true)
+                        + " AND (ISNULL(:author) OR p.author = :author) ")
         List<Post> search(
                         Pageable pageable,
                         @Param("postId") Long postId,
