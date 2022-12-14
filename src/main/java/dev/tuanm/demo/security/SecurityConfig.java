@@ -1,6 +1,5 @@
 package dev.tuanm.demo.security;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,22 +55,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     protected void configureWithFilter(HttpSecurity http, Filter filter) throws Exception {
-        final List<String> whitelist = Optional.ofNullable(this.properties.getWhitelist())
-                .orElse(Collections.emptyList());
-        final String[] authWhiteList = whitelist.toArray(new String[whitelist.size()]);
+        final String[] whitelist = Optional.ofNullable(this.properties.getWhitelist())
+                .map(list -> list.toArray(new String[list.size()]))
+                .orElse(new String[] {});
 
         if (filter instanceof JwtFilter) {
             http.antMatcher(PathConstants.JWT_AUTH_URL_PATTERN)
                     .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                     .authorizeRequests()
-                    .antMatchers(authWhiteList).permitAll()
+                    .antMatchers(whitelist).permitAll()
                     .antMatchers(PathConstants.ADMIN_AUTH_URL_PATTERN).hasAuthority(AuthorityConstants.ROLE_ADMIN)
                     .anyRequest().authenticated();
         } else if (filter instanceof PrivateResourceFilter) {
             http.antMatcher(PathConstants.PRIVATE_AUTH_URL_PATTERN)
                     .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                     .authorizeRequests()
-                    .antMatchers(authWhiteList).permitAll()
+                    .antMatchers(whitelist).permitAll()
                     .anyRequest().authenticated();
         }
         http.csrf().disable().httpBasic();
