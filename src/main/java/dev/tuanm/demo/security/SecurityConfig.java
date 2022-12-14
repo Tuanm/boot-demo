@@ -1,7 +1,14 @@
 package dev.tuanm.demo.security;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import javax.servlet.Filter;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,20 +21,31 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import dev.tuanm.demo.common.constant.AuthorityConstants;
 import dev.tuanm.demo.common.constant.PathConstants;
 import dev.tuanm.demo.security.filter.PrivateResourceFilter;
+import dev.tuanm.demo.security.filter.ServletRequestChecker;
 import dev.tuanm.demo.security.filter.JwtFilter;
 import dev.tuanm.demo.utils.PrivateResourceUtils;
 import dev.tuanm.demo.utils.JwtUtils;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private SecurityProperties properties;
+
     protected final UserDetailsService userService;
     protected final PasswordEncoder passwordEncoder;
+    protected final ServletRequestChecker requestChecker;
 
     public SecurityConfig(
             UserDetailsService userService,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            ServletRequestChecker requestChecker) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.requestChecker = requestChecker;
     }
 
     @Override
@@ -38,21 +56,33 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     protected void configureWithFilter(HttpSecurity http, Filter filter) throws Exception {
+        final List<String> whitelist = Optional.ofNullable(this.properties.getWhitelist())
+                .orElse(Collections.emptyList());
+        final String[] authWhiteList = whitelist.toArray(new String[whitelist.size()]);
+
         if (filter instanceof JwtFilter) {
             http.antMatcher(PathConstants.JWT_AUTH_URL_PATTERN)
                     .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                     .authorizeRequests()
-                    .antMatchers(PathConstants.AUTH_WHITELIST).permitAll()
-                    .antMatchers(PathConstants.ADMIN_AUTH_LIST).hasAuthority(AuthorityConstants.ROLE_ADMIN)
+                    .antMatchers(authWhiteList).permitAll()
+                    .antMatchers(PathConstants.ADMIN_AUTH_URL_PATTERN).hasAuthority(AuthorityConstants.ROLE_ADMIN)
                     .anyRequest().authenticated();
         } else if (filter instanceof PrivateResourceFilter) {
             http.antMatcher(PathConstants.PRIVATE_AUTH_URL_PATTERN)
                     .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                     .authorizeRequests()
-                    .antMatchers(PathConstants.AUTH_WHITELIST).permitAll()
+                    .antMatchers(authWhiteList).permitAll()
                     .anyRequest().authenticated();
         }
         http.csrf().disable().httpBasic();
+    }
+
+    @Getter
+    @Setter
+    @Configuration
+    @ConfigurationProperties(prefix = "server.security.authentication")
+    public static class SecurityProperties {
+        private List<String> whitelist;
     }
 
     @Order(1)
@@ -63,14 +93,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         public JwtConfig(
                 UserDetailsService userService,
                 PasswordEncoder passwordEncoder,
+                ServletRequestChecker requestChecker,
                 JwtUtils jwtUtils) {
-            super(userService, passwordEncoder);
+            super(userService, passwordEncoder, requestChecker);
             this.jwtUtils = jwtUtils;
         }
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            this.configureWithFilter(http, new JwtFilter(jwtUtils, userService));
+            this.configureWithFilter(http, new JwtFilter(requestChecker, jwtUtils, userService));
         }
     }
 
@@ -82,15 +113,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         public PrivateResourceConfig(
                 UserDetailsService userService,
                 PasswordEncoder passwordEncoder,
+                ServletRequestChecker requestChecker,
                 PrivateResourceUtils privateResourceUtils) {
-            super(userService, passwordEncoder);
+            super(userService, passwordEncoder, requestChecker);
             this.privateResourceUtils = privateResourceUtils;
 
         }
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            this.configureWithFilter(http, new PrivateResourceFilter(privateResourceUtils));
+            this.configureWithFilter(http, new PrivateResourceFilter(requestChecker, privateResourceUtils));
         }
     }
 }

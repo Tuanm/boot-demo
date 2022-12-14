@@ -3,8 +3,11 @@ package dev.tuanm.demo.security.filter;
 import java.io.IOException;
 import java.util.Optional;
 
+import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -12,20 +15,23 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 import dev.tuanm.demo.utils.JwtUtils;
 import io.jsonwebtoken.ExpiredJwtException;
 
-public class JwtFilter extends OncePerRequestFilter implements AuthenticationChangeable {
+public class JwtFilter implements Filter, AuthenticationChangeable {
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
 
+    private final ServletRequestChecker requestChecker;
     private final UserDetailsService userDetailsService;
     private final JwtUtils jwtUtils;
 
-    public JwtFilter(JwtUtils jwtUtils, UserDetailsService userDetailsService) {
+    public JwtFilter(
+            ServletRequestChecker requestChecker,
+            JwtUtils jwtUtils, UserDetailsService userDetailsService) {
+        this.requestChecker = requestChecker;
         this.jwtUtils = jwtUtils;
         this.userDetailsService = userDetailsService;
     }
@@ -57,20 +63,28 @@ public class JwtFilter extends OncePerRequestFilter implements AuthenticationCha
         }
     }
 
-    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        Optional<String> token = Optional.ofNullable(getTokenFromRequest(request));
-        if (token.isPresent()) {
-            try {
-                String username = this.jwtUtils.getUsernameFromToken(token.get());
-                this.validate(username, token.get());
-            } catch (ExpiredJwtException ex) {
-                setAuthentication(null);
-            }
-        } else {
-            setAuthentication(null);
-        }
+        Optional.ofNullable(this.requestChecker.check(request))
+                .ifPresentOrElse(this::setAuthentication, () -> {
+                    Optional<String> token = Optional.ofNullable(getTokenFromRequest(request));
+                    if (token.isPresent()) {
+                        try {
+                            String username = this.jwtUtils.getUsernameFromToken(token.get());
+                            this.validate(username, token.get());
+                        } catch (ExpiredJwtException ex) {
+                            setAuthentication(null);
+                        }
+                    } else {
+                        setAuthentication(null);
+                    }
+                });
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
+        this.doFilterInternal((HttpServletRequest) request, (HttpServletResponse) response, chain);
     }
 }

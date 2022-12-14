@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.tuanm.demo.common.annotation.Permitted;
 import dev.tuanm.demo.common.constant.PathConstants;
 import dev.tuanm.demo.common.exception.UnauthorizedRequestException;
 import dev.tuanm.demo.model.request.AuthenticationRequest;
@@ -24,6 +25,7 @@ public class AuthenticationController {
         this.userService = userService;
     }
 
+    @Permitted
     @PostMapping(PathConstants.API_AUTHENTICATION_URL)
     public JwtResponse authenticate(
             @RequestBody @NotNull AuthenticationRequest request) {
@@ -35,6 +37,7 @@ public class AuthenticationController {
                 .orElseThrow(UnauthorizedRequestException::new);
     }
 
+    @Permitted
     @PostMapping(PathConstants.API_REGISTRATION_URL)
     public void register(
             @RequestBody @NotNull UserRegistrationRequest userRegistrationRequest) {
